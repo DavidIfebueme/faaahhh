@@ -67,29 +67,33 @@ export function createTaskDetector(tasksApi: TasksApiLike, now: Clock = () => Da
         return { dispose: () => {} };
       }
 
-      const disposable = tasksApi.onDidEndTaskProcess((event) => {
-        const failed = typeof event.exitCode === 'number' && event.exitCode !== 0;
-        if (!failed) {
-          return;
-        }
+      try {
+        const disposable = tasksApi.onDidEndTaskProcess((event) => {
+          const failed = typeof event.exitCode === 'number' && event.exitCode !== 0;
+          if (!failed) {
+            return;
+          }
 
-        if (!isLikelyTestTask(event.execution.task)) {
-          return;
-        }
+          if (!isLikelyTestTask(event.execution.task)) {
+            return;
+          }
 
-        const task = event.execution.task;
-        const taskName = typeof task.name === 'string' && task.name.length > 0 ? task.name : 'task';
-        const timestamp = now();
+          const task = event.execution.task;
+          const taskName = typeof task.name === 'string' && task.name.length > 0 ? task.name : 'task';
+          const timestamp = now();
 
-        onFailure({
-          source: 'task',
-          runId: `task-${timestamp}-${taskName}`,
-          failedCount: 1,
-          timestamp
+          onFailure({
+            source: 'task',
+            runId: `task-${timestamp}-${taskName}`,
+            failedCount: 1,
+            timestamp
+          });
         });
-      });
 
-      return { dispose: () => disposable.dispose() };
+        return { dispose: () => disposable.dispose() };
+      } catch {
+        return { dispose: () => {} };
+      }
     }
   };
 }

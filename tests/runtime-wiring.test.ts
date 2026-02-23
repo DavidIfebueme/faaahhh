@@ -55,4 +55,35 @@ describe('runtime wiring', () => {
     expect(disposeA).toHaveBeenCalledTimes(1);
     expect(disposeB).toHaveBeenCalledTimes(1);
   });
+
+  test('continues wiring when a detector throws on start', () => {
+    const play = vi.fn();
+    const coordinator = new FailureEventCoordinator(play, {
+      enabled: true,
+      cooldownMs: 0,
+      dedupeWindowMs: 0
+    });
+
+    const goodDetector = {
+      start: (onFailure: (value: FailureEvent) => void) => {
+        onFailure({
+          source: 'task',
+          runId: 'ok',
+          failedCount: 1,
+          timestamp: 1
+        });
+        return { dispose: vi.fn() };
+      }
+    };
+
+    const badDetector = {
+      start: () => {
+        throw new Error('boom');
+      }
+    };
+
+    wireDetectors([badDetector, goodDetector], coordinator);
+
+    expect(play).toHaveBeenCalledTimes(1);
+  });
 });

@@ -14,6 +14,11 @@ export function activate(context: vscode.ExtensionContext): void {
   const output = createOutputChannelLogger(vscode.window);
   const logger = output.logger;
   const audioPlayer = new SystemAudioPlayer(context, () => readSettings());
+  const commandDisposable = registerTestSoundCommand(vscode.commands, vscode.window, audioPlayer, logger);
+
+  context.subscriptions.push({ dispose: () => output.disposable.dispose() });
+  context.subscriptions.push(commandDisposable);
+
   const coordinator = new FailureEventCoordinator(
     (event) => {
       logger.info(`Failure detected from ${event.source} (${event.runId}).`);
@@ -26,20 +31,21 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
-  const runtime = wireDetectors(
-    [
-      createTestingApiDetector(vscode.tests as unknown as { onDidChangeTestResults?: (listener: (results: unknown) => void) => { dispose: () => void } }),
-      createTerminalDetector(vscode.window, settings.terminalCommandPatterns),
-      createTaskDetector(vscode.tasks)
-    ],
-    coordinator
-  );
+  let runtime: { dispose: () => void } = { dispose: () => {} };
+  try {
+    runtime = wireDetectors(
+      [
+        createTestingApiDetector(vscode.tests as unknown as { onDidChangeTestResults?: (listener: (results: unknown) => void) => { dispose: () => void } }),
+        createTerminalDetector(vscode.window, settings.terminalCommandPatterns),
+        createTaskDetector(vscode.tasks)
+      ],
+      coordinator
+    );
+  } catch (error) {
+    logger.error(String(error));
+  }
 
-  const disposable = registerTestSoundCommand(vscode.commands, vscode.window, audioPlayer, logger);
-
-  context.subscriptions.push({ dispose: () => output.disposable.dispose() });
   context.subscriptions.push({ dispose: () => runtime.dispose() });
-  context.subscriptions.push(disposable);
 }
 
 export function deactivate(): void {}

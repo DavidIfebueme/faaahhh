@@ -75,23 +75,34 @@ function toFailureEvent(result: unknown, index: number, now: number): FailureEve
 export function createTestingApiDetector(api: TestingResultsApi, now: Clock = () => Date.now()): FailureDetector {
   return {
     start: (onFailure) => {
-      if (typeof api.onDidChangeTestResults !== 'function') {
+      let onDidChangeTestResults: TestingResultsApi['onDidChangeTestResults'];
+      try {
+        onDidChangeTestResults = api.onDidChangeTestResults;
+      } catch {
         return { dispose: () => {} };
       }
 
-      const disposable = api.onDidChangeTestResults((results) => {
-        const timestamp = now();
-        const list = toArray(results);
+      if (typeof onDidChangeTestResults !== 'function') {
+        return { dispose: () => {} };
+      }
 
-        for (let index = 0; index < list.length; index += 1) {
-          const event = toFailureEvent(list[index], index, timestamp);
-          if (event) {
-            onFailure(event);
+      try {
+        const disposable = onDidChangeTestResults((results) => {
+          const timestamp = now();
+          const list = toArray(results);
+
+          for (let index = 0; index < list.length; index += 1) {
+            const event = toFailureEvent(list[index], index, timestamp);
+            if (event) {
+              onFailure(event);
+            }
           }
-        }
-      });
+        });
 
-      return { dispose: () => disposable.dispose() };
+        return { dispose: () => disposable.dispose() };
+      } catch {
+        return { dispose: () => {} };
+      }
     }
   };
 }

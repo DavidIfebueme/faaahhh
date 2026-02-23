@@ -45,27 +45,31 @@ export function createTerminalDetector(windowApi: WindowLike, patterns: string[]
         return { dispose: () => {} };
       }
 
-      const disposable = windowApi.onDidEndTerminalShellExecution((event) => {
-        const command = event.execution.commandLine.value;
-        const failed = typeof event.exitCode === 'number' && event.exitCode !== 0;
+      try {
+        const disposable = windowApi.onDidEndTerminalShellExecution((event) => {
+          const command = event.execution.commandLine.value;
+          const failed = typeof event.exitCode === 'number' && event.exitCode !== 0;
 
-        if (!failed) {
-          return;
-        }
+          if (!failed) {
+            return;
+          }
 
-        if (!isTestCommand(command, patterns)) {
-          return;
-        }
+          if (!isTestCommand(command, patterns)) {
+            return;
+          }
 
-        onFailure({
-          source: 'terminal',
-          runId: `terminal-${now()}-${command}`,
-          failedCount: 1,
-          timestamp: now()
+          onFailure({
+            source: 'terminal',
+            runId: `terminal-${now()}-${command}`,
+            failedCount: 1,
+            timestamp: now()
+          });
         });
-      });
 
-      return { dispose: () => disposable.dispose() };
+        return { dispose: () => disposable.dispose() };
+      } catch {
+        return { dispose: () => {} };
+      }
     }
   };
 }
