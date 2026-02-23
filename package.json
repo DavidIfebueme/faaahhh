@@ -1,0 +1,114 @@
+{
+  "name": "faaahhh",
+  "displayName": "faaahhh",
+  "version": "0.0.1",
+  "description": "Play a sound when tests fail.",
+  "main": "./dist/extension.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "pretest": "npm run build"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Testing"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "faaahhh.testSound",
+        "title": "Faaahhh: Test Sound"
+      }
+    ],
+    "configuration": {
+      "title": "Faaahhh",
+      "properties": {
+        "faaahhh.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable sound playback on test failures."
+        },
+        "faaahhh.cooldownMs": {
+          "type": "number",
+          "default": 30000,
+          "minimum": 0,
+          "description": "Minimum time in milliseconds between failure sounds."
+        },
+        "faaahhh.audioSource": {
+          "type": "string",
+          "enum": [
+            "bundled",
+            "custom"
+          ],
+          "default": "bundled",
+          "description": "Select whether to use the bundled sound or a custom audio file."
+        },
+        "faaahhh.customAudioPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to a custom audio file."
+        },
+        "faaahhh.terminalCommandPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "npm test",
+            "pnpm test",
+            "yarn test",
+            "bun test",
+            "vitest",
+            "jest",
+            "pytest",
+            "go test",
+            "cargo test",
+            "dotnet test",
+            "mvn test",
+            "gradle test"
+          ],
+          "description": "List of command fragments used to detect terminal test commands."
+        },
+        "faaahhh.dedupeWindowMs": {
+          "type": "number",
+          "default": 1500,
+          "minimum": 0,
+          "description": "Time window in milliseconds to suppress duplicate events from multiple detectors."
+        }
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "media",
+    "package.json",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/DavidIfebueme/faaahhh.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/DavidIfebueme/faaahhh/issues"
+  },
+  "homepage": "https://github.com/DavidIfebueme/faaahhh#readme",
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "@types/vscode": "^1.109.0",
+    "@vscode/test-electron": "^2.5.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
