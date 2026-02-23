@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { NoopAudioPlayer } from './audio/audioPlayer';
+import { SystemAudioPlayer } from './audio/audioPlayer';
 import { readSettings } from './config/settings';
 import { FailureEventCoordinator } from './core/failureEventCoordinator';
 import { wireDetectors } from './core/runtime';
@@ -9,7 +9,7 @@ import { createTerminalDetector } from './detectors/terminalDetector';
 
 export function activate(context: vscode.ExtensionContext): void {
   const settings = readSettings();
-  const audioPlayer = new NoopAudioPlayer();
+  const audioPlayer = new SystemAudioPlayer(context, () => readSettings());
   const coordinator = new FailureEventCoordinator(
     (event) => {
       void audioPlayer.play(event);
