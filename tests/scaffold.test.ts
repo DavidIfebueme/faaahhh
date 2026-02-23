@@ -17,9 +17,8 @@ describe('extension scaffold', () => {
 
   test('includes extension entry point and packaged media', () => {
     const pkg = readJson('package.json');
-    const ignore = readFileSync(join(root, '.vscodeignore'), 'utf8');
     expect(pkg.main).toBe('./dist/extension.js');
     expect(pkg.files).toContain('media');
-    expect(ignore.includes('src/**')).toBe(true);
+    expect(pkg.files).toContain('dist');
   });
 });
