@@ -2,6 +2,13 @@ import { describe, expect, test, vi } from 'vitest';
 import { createTerminalDetector } from '../src/detectors/terminalDetector';
 
 describe('terminal detector', () => {
+  test('returns noop subscription when terminal shell execution api is unavailable', () => {
+    const detector = createTerminalDetector({}, ['npm test'], () => 5000);
+    const subscription = detector.start(vi.fn());
+
+    expect(typeof subscription.dispose).toBe('function');
+  });
+
   test('emits when a matching test command exits with failure', () => {
     let listener: ((event: { execution: { commandLine: { value: string } }; exitCode: number | undefined }) => void) | undefined;
     const windowApi = {

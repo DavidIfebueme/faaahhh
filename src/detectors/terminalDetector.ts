@@ -12,7 +12,7 @@ type TerminalEndEventLike = {
 };
 
 type WindowLike = {
-  onDidEndTerminalShellExecution: (listener: (event: TerminalEndEventLike) => void) => DisposableLike;
+  onDidEndTerminalShellExecution?: (listener: (event: TerminalEndEventLike) => void) => DisposableLike;
 };
 
 type Clock = () => number;
@@ -41,6 +41,10 @@ function isTestCommand(commandLine: string, patterns: string[]): boolean {
 export function createTerminalDetector(windowApi: WindowLike, patterns: string[], now: Clock = () => Date.now()): FailureDetector {
   return {
     start: (onFailure) => {
+      if (typeof windowApi.onDidEndTerminalShellExecution !== 'function') {
+        return { dispose: () => {} };
+      }
+
       const disposable = windowApi.onDidEndTerminalShellExecution((event) => {
         const command = event.execution.commandLine.value;
         const failed = typeof event.exitCode === 'number' && event.exitCode !== 0;

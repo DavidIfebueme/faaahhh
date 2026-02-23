@@ -2,6 +2,13 @@ import { describe, expect, test, vi } from 'vitest';
 import { createTaskDetector } from '../src/detectors/taskDetector';
 
 describe('task detector', () => {
+  test('returns noop subscription when task process api is unavailable', () => {
+    const detector = createTaskDetector({}, () => 7000);
+    const subscription = detector.start(vi.fn());
+
+    expect(typeof subscription.dispose).toBe('function');
+  });
+
   test('emits for failed test-group tasks', () => {
     let listener: ((event: { execution: { task: { name?: string; group?: { id?: string } } }; exitCode: number | undefined }) => void) | undefined;
     const tasksApi = {

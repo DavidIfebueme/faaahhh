@@ -29,36 +29,8 @@ export function activate(context: vscode.ExtensionContext): void {
   const runtime = wireDetectors(
     [
       createTestingApiDetector(vscode.tests as unknown as { onDidChangeTestResults?: (listener: (results: unknown) => void) => { dispose: () => void } }),
-      createTerminalDetector(
-        vscode.window as unknown as {
-          onDidEndTerminalShellExecution: (listener: (event: {
-            execution: { commandLine: { value: string } };
-            exitCode: number | undefined;
-          }) => void) => { dispose: () => void };
-        },
-        settings.terminalCommandPatterns
-      ),
-      createTaskDetector(
-        vscode.tasks as unknown as {
-          onDidEndTaskProcess: (listener: (event: {
-            execution: {
-              task: {
-                name?: string;
-                source?: string;
-                detail?: string;
-                group?: { id?: string };
-                definition?: {
-                  type?: string;
-                  script?: string;
-                  task?: string;
-                  command?: string;
-                };
-              };
-            };
-            exitCode: number | undefined;
-          }) => void) => { dispose: () => void };
-        }
-      )
+      createTerminalDetector(vscode.window, settings.terminalCommandPatterns),
+      createTaskDetector(vscode.tasks)
     ],
     coordinator
   );

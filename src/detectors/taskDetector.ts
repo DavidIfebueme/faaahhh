@@ -25,7 +25,7 @@ type TaskProcessEndEventLike = {
 };
 
 type TasksApiLike = {
-  onDidEndTaskProcess: (listener: (event: TaskProcessEndEventLike) => void) => DisposableLike;
+  onDidEndTaskProcess?: (listener: (event: TaskProcessEndEventLike) => void) => DisposableLike;
 };
 
 type Clock = () => number;
@@ -63,6 +63,10 @@ function isLikelyTestTask(task: TaskLike): boolean {
 export function createTaskDetector(tasksApi: TasksApiLike, now: Clock = () => Date.now()): FailureDetector {
   return {
     start: (onFailure) => {
+      if (typeof tasksApi.onDidEndTaskProcess !== 'function') {
+        return { dispose: () => {} };
+      }
+
       const disposable = tasksApi.onDidEndTaskProcess((event) => {
         const failed = typeof event.exitCode === 'number' && event.exitCode !== 0;
         if (!failed) {
