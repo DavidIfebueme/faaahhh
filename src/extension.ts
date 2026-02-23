@@ -10,9 +10,16 @@ import { createTerminalDetector } from './detectors/terminalDetector';
 export function activate(context: vscode.ExtensionContext): void {
   const settings = readSettings();
   const audioPlayer = new NoopAudioPlayer();
-  const coordinator = new FailureEventCoordinator((event) => {
-    void audioPlayer.play(event);
-  });
+  const coordinator = new FailureEventCoordinator(
+    (event) => {
+      void audioPlayer.play(event);
+    },
+    {
+      enabled: settings.enabled,
+      cooldownMs: settings.cooldownMs,
+      dedupeWindowMs: settings.dedupeWindowMs
+    }
+  );
 
   const runtime = wireDetectors(
     [

@@ -6,7 +6,11 @@ import { wireDetectors } from '../src/core/runtime';
 describe('runtime wiring', () => {
   test('forwards detector failures to coordinator', () => {
     const play = vi.fn();
-    const coordinator = new FailureEventCoordinator(play);
+    const coordinator = new FailureEventCoordinator(play, {
+      enabled: true,
+      cooldownMs: 0,
+      dedupeWindowMs: 0
+    });
     const event: FailureEvent = {
       source: 'terminal',
       runId: 'run-1',
@@ -30,7 +34,11 @@ describe('runtime wiring', () => {
   test('disposes all detector subscriptions', () => {
     const disposeA = vi.fn();
     const disposeB = vi.fn();
-    const coordinator = new FailureEventCoordinator(() => {});
+    const coordinator = new FailureEventCoordinator(() => {}, {
+      enabled: true,
+      cooldownMs: 0,
+      dedupeWindowMs: 0
+    });
 
     const detectorA = {
       start: () => ({ dispose: disposeA })
